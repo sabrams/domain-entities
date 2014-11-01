@@ -1,0 +1,38 @@
+{
+  "name": "domain-entities",
+  "description": "Promotes domain driven design with entities and value objects, separated from persistence mechanisms",
+  "version": "0.1.0",
+  "homepage": "https://github.com/sabrams/domain-entities",
+  "author": {
+    "name": "Stephen Abrams",
+    "email": "abrams.stephen@gmail.com",
+    "url": "http://supersabrams.com/blog"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/sabrams/domain-entities.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sabrams/domain-entities/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/sabrams/domain-entities/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "lib/domain-entities",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt mocha"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "~0.6.4",
+    "grunt-contrib-nodeunit": "~0.2.0",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt": "~0.4.5"
+  },
+  "keywords": []
+}
