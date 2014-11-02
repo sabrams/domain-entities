@@ -3,9 +3,11 @@
 Promotes domain driven design with entities and value objects, separated from persistence mechanisms
 
 ## Getting Started
+_(Coming soon)_
 Install the module with: `npm install domain-entities`
 
 ```javascript
+_(Coming soon)_
 var domain_entities = require('domain-entities');
 domain_entities.awesome(); // "awesome"
 ```
