@@ -22,8 +22,29 @@ describe('created model', function () {
         var Model = modelFactory.create({});
         (typeof Model.create === 'function').should.be.true;
     });
+    it('should have a constructor function named "reconstitute" (intended for repositories)', function () {
+        var modelFactory = ModelFactory.create({});
+        var Model = modelFactory.create({});
+        (typeof Model.reconstitute === 'function').should.be.true;
+    });
     describe('entity creation', function () {
         describe('invalid object construction', function () {
+            it('should execute custom validation in addition to internal validation (based on field specs), including all validation errors in thrown exception', function () {
+                var modelFactory = ModelFactory.create({});
+                var Person = modelFactory.create({
+                    attrs: {
+                        firstName: {
+                            required: true,
+                            type: String
+                        }
+                    },
+                    validate: function (attrs) {
+                        throw 'custom validation failed'
+                    }
+                });
+                Person.create.bind(Person, {firstName: 'bob'}).should.throw('custom validation failed');
+                Person.create.bind(Person, {}).should.throw('Required field: firstName,custom validation failed');
+            });
             it('should throw error when required field is missing', function () {
                 var modelFactory = ModelFactory.create({});
                 var Person = modelFactory.create({
@@ -80,10 +101,105 @@ describe('created model', function () {
             it('should allow value objects (dates or VOs defined in ModelFactory creation) passed as constructor attributes or as VO type');
         })
     })
+    describe('entity reconstitution', function () {
+        it('excluding related entities, it should create an object with the same attributes as create', function () {
+            var modelFactory = ModelFactory.create({});
+            var Address = modelFactory.create({
+                valueObject: true,
+                attrs: {
+                    street: {
+                        type: String
+                    },
+                    city: {
+                        type: String
+                    },
+                    state: {
+                        type: String
+                    },
+                    country: {
+                        type: String,
+                        required: true
+                    }
+                }
+            });
+            var Person = modelFactory.create({
+                attrs: {
+                    homeAddress: {
+                        type: Address
+                    },
+                    firstName: {
+                        type: String
+                    }
+                }
+            });
+            var person1 = Person.create({
+                homeAddress: {
+                    street: '123 1st St.',
+                    city: 'anywhere',
+                    state: 'ohio',
+                    country: 'US'
+                },
+                firstName: 'bob'
+            });
+            var person2 = Person.reconstitute({
+                homeAddress: {
+                    street: '123 1st St.',
+                    city: 'anywhere',
+                    state: 'ohio',
+                    country: 'US'
+                },
+                firstName: 'bob'
+            });
+
+//            person1.should.eql(person2);
+            person1.toData().should.eql(person2.toData())
+        });
+        it('should execute neither custom validation nor field-specified validation', function(){
+                var modelFactory = ModelFactory.create({});
+                var Address = modelFactory.create({
+                    valueObject: true,
+                    attrs: {
+                        street: {
+                            type: String
+                        },
+                        city: {
+                            type: String
+                        },
+                        state: {
+                            type: String
+                        },
+                        country: {
+                            type: String,
+                            required: true
+                        }
+                    }
+                });
+                var Person = modelFactory.create({
+                    attrs: {
+                        homeAddress: {
+                            type: Address
+                        },
+                        firstName: {
+                            type: String,
+                            required: true
+                        }
+                    }
+                });
+
+                Person.reconstitute.bind(Person, {
+                    homeAddress: {
+                        street: '123 1st St.',
+                        city: 'anywhere',
+                        state: 'ohio'
+                    }
+                }).should.not.throwError();
+        })
+
+    })
 });
 
-describe('created value object', function() {
-    it('should not allow an id to be set or retrieved if not part of the VO\'s attributes', function() {
+describe('created value object', function () {
+    it('should not allow an id to be set or retrieved if not part of the VO\'s attributes', function () {
         var modelFactory = ModelFactory.create({});
         var Address = modelFactory.create({
             valueObject: true,
@@ -141,7 +257,7 @@ describe('created entity', function () {
             firstName: 'sam'
         })
     });
-    it('should allow an id (string or number) to be set on it and retrieved from it', function() {
+    it('should allow an id (string or number) to be set on it and retrieved from it', function () {
         var modelFactory = ModelFactory.create({});
         var Person = modelFactory.create({
             attrs: {
@@ -166,7 +282,7 @@ describe('created entity', function () {
 //        });
 
     });
-    it('should not expose an id directly', function() {
+    it('should not expose an id directly', function () {
         var modelFactory = ModelFactory.create({});
         var Person = modelFactory.create({
             attrs: {
@@ -188,7 +304,7 @@ describe('created entity', function () {
         });
         (person.id === undefined).should.be.true;
     });
-    it('should include id in toJSON result, toData result', function() {
+    it('should include id in toJSON result, toData result', function () {
         var modelFactory = ModelFactory.create({});
         var Person = modelFactory.create({
             attrs: {
